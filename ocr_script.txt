@@ -1,0 +1,113 @@
+#MY first shell script
+
+
+
+
+
+
+#getting file path 
+
+export HOME1=/home/usr
+export FILE_PATH=$HOME1/OCR/uploads
+
+#path for error file and script
+export LOG_PATH=$HOME1/OCR/logs
+export SCRIPT_PATH=$HOME1/OCR/scripts
+export IMAGES_FILE_PATH=$HOME1/OCR/images
+export TEXT_FILE_PATH=$HOME1/OCR/text
+export TIFF_IMAGES_FILE_PATH=$HOME1/OCR/tiff
+
+>S$CRIPT_PATH/err_msg
+
+
+
+#getting file name
+#logic to extract multiple pdf file yet to be written
+
+FILE_NAME=$(ls -ltr $FILE_PATH  | awk {'print $9'} | grep $1)
+
+
+#FILE_NAME = 'll -ltr '$FILE_PATH' | awk {'print $10'} | grep '$1'\.*'
+#FILE_NAME='ll -ltr $FILE_PATH | awk {'print $FILE_PATH/*$1*'}'
+#FILE_NAME='hello.pdf'
+
+
+
+
+
+
+
+# code to extract from pdf to png
+
+for FILE in $(ls -ltr $FILE_PATH  | awk {'print $9'} | grep $1)
+do
+echo $FILE
+pdftopng $FILE_PATH/$FILE $IMAGES_FILE_PATH/$FILE
+   if [ $? -ne 0 ]; then
+        {
+                echo "Error while converting from pdf to png
+
+$SCRIPT_PATH" >> $SCRIPT_PATH/err_msg
+        }
+        fi
+done
+
+# code to give permission for png files
+
+for FILE_PER in $(ls -ltr $IMAGES_FILE_PATH  | awk {'print $9'} | grep $1)
+do
+echo $FILE_PER
+echo $(chmod -R 755 $IMAGES_FILE_PATH/$FILE_PER)
+done
+
+
+
+# code to extract from png to tiff
+
+
+for FILE_PNG in $(ls -ltr $IMAGES_FILE_PATH  | awk {'print $9'} | grep $1)
+do
+
+convert $IMAGES_FILE_PATH/$FILE_PNG -colorspace Gray $TIFF_IMAGES_FILE_PATH/$FILE_PNG.tif
+if [ $? -ne 0 ]; then
+        {
+                echo "Error while converting from png to tiff
+
+$SCRIPT_PATH" >> $SCRIPT_PATH/err_msg
+        }
+        fi
+
+# code to give permission for tiff files
+
+for FILE_PER in $(ls -ltr $TIFF_IMAGES_FILE_PATH  | awk {'print $9'} | grep $1)
+do
+echo $FILE_PER
+echo $(chmod -R 755 $TIFF_IMAGES_FILE_PATH/$FILE_PER)
+done
+
+
+
+
+# code to extract from tiff to text
+
+tesseract $TIFF_IMAGES_FILE_PATH/$FILE_PNG.tif $TEXT_FILE_PATH/$FILE_PNG
+
+ if [ $? -ne 0 ]; then
+        {
+                echo "Error while converting from tiff to text
+
+$SCRIPT_PATH" >> $SCRIPT_PATH/err_msg
+        }
+        fi
+ 
+done
+
+# code to give permission for text files
+
+for FILE_PER in $(ls -ltr $TEXT_FILE_PATH | awk {'print $9'} | grep $1)
+do
+echo $FILE_PER
+echo $(chmod -R 755 $TEXT_FILE_PATH/$FILE_PER)
+done
+
+
